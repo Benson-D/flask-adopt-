@@ -5,7 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 
 from models import db, connect_db, Pet
-from forms import AddPetForm
+from forms import AddPetForm, EditPetForm
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///adopt"
@@ -13,6 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
 app.config['SECRET_KEY'] = "secret"
+# In development keep ON 
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 connect_db(app)
@@ -35,7 +36,6 @@ def render_pet_list():
 
     return render_template('pet-list.html', pets=pets)
 
-
 @app.route("/add", methods=["GET", "POST"])
 def add_pet():
     """Pet add form; handle adding."""
@@ -54,7 +54,7 @@ def add_pet():
             photo_url=photo_url, 
             age=age, 
             notes=notes)
-        breakpoint()
+        # breakpoint()
         db.session.add(pet)
         db.session.commit()
 
@@ -64,3 +64,29 @@ def add_pet():
     else:
         return render_template(
             "add-pet-form.html", form=form)
+
+# ASK about validation rendering display through form route 
+@app.route("/<int:pet_id>", methods=["GET", "POST"])
+def edit_form(pet_id):
+    # SHORT and sweet to the point 
+    """Pet display profile edit form handling."""
+    pet = Pet.query.get_or_404(pet_id)
+
+    form = EditPetForm(obj=pet)
+    # REMEMBER OBJ 
+
+    if form.validate_on_submit():
+        pet.photo_url = form.photo_url.data
+        pet.notes = form.notes.data
+        pet.available = form.available.data
+        
+        # breakpoint()
+        db.session.commit()
+
+        flash(f"Edited {pet.name}!")
+        return redirect(f"/{pet_id}")
+
+    else:
+      
+        return render_template(
+            "pet-display-edit.html", form=form, pet=pet)

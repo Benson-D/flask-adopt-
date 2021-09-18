@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-
 def connect_db(app):
     """Connect this database to provided Flask app.
 
@@ -27,9 +26,13 @@ class Pet(db.Model):
     species = db.Column(db.String(50),
                           nullable=False)
     photo_url = db.Column(db.String(), default='', nullable=False)
+
     age = db.Column(db.String(), nullable=False)
     # Make note: need a drop when it comes to this selection
-    notes = db.Column(db.String(), nullable=True) 
+    notes = db.Column(db.String(), nullable=False)
+    # This should be false, provide a default of empty string 
+
     # ASK should make true when previous is false? 
     available = db.Column(db.Boolean(), nullable=False, default=True) 
 
+# db.Text() is better when No limits on text 
